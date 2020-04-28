@@ -28,3 +28,7 @@ yarn-error.log
 /public/mix-manifest.json
 
 phpunit.dusk.xml
+resources/assets/js/pages/question/dummy.vue
+resources/assets/js/components/dummy.vue
+storage/
+bootstrap/
