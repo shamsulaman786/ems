@@ -16,11 +16,3 @@ yarn-error.log
 /public/mix-manifest.json
 
 phpunit.dusk.xml
-node_modules/
-.env
-.gitignore
-.env.dusk.local
-tests/Browser/console/.gitignore
-storage/app/public/.gitignore
-storage/app/.gitignore
-storage/logs/.gitignore
