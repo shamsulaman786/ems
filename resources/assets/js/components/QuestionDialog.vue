@@ -1,8 +1,12 @@
 <template>
       <v-dialog v-model="dialog" persistent max-width="600px">
         <template v-slot:activator="{ on }">
-          <v-btn color="primary" dark v-on="on">Set Question</v-btn>
-          <!-- <v-btn color="primary" :disabled="disableDialogButton" dark v-on="on">Open Dialog</v-btn> -->
+          <!-- <v-btn :disabled="disableDialogButton" fab dark color="indigo" v-on="on">
+            <v-icon dark>add</v-icon>
+          </v-btn> -->
+          <v-btn  fab dark color="indigo" v-on="on">
+            <v-icon dark>add</v-icon>
+          </v-btn>
         </template>
         <v-card>
           <v-card-title>
@@ -47,7 +51,7 @@
                 </v-flex>
                 <v-flex xs12 sm4>
                   <v-autocomplete
-                    :items="['A', 'B']"
+                    :items='sectionItems'
                     v-model="section"
                     label="Section*"
                     required
@@ -86,6 +90,10 @@ export default {
       type: Boolean,
       default:true
     },
+    sectionItems: {
+      type: Array,
+      default: ["A","B","C","D","E","F","G","H","I","J"]
+    }
   },
   data () {
     return {
@@ -94,6 +102,7 @@ export default {
       choice: '',
       difficultyLevel: '',
       section: '',
+      favorites:[[]],
       maxMarks: '',
       CO:[''],
     questionSpecifications:[
@@ -113,19 +122,20 @@ methods: {
     this.questionSpecifications.difficultyLevel=this.difficultyLevel,
     this.questionSpecifications.section=this.section,
     this.questionSpecifications.maxMarks=this.maxMarks;
-    // this.CO.forEach(element => {
-    //   this.questionSpecifications.CO.push(element);
-    //   // this.questionSpecifications.CO += element+" ";
-    // });
     var element ='';
     for (let index = 1; index < this.CO.length; index++) {
       element += this.CO[index]+' ';
     }
     this.questionSpecifications.CO = element;
-    // console.log(this.questionSpecifications)
     this.$emit('addQuestion', this.questionSpecifications)
 
-}
+  }
+},
+
+watch: {
+  dialog (newValue, oldValue) {
+
+  }
 },
 }
 </script>

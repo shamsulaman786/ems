@@ -17,7 +17,7 @@ const options = {
     'scrollbars=yes'
   ],
   styles: [
-    'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css',
+    'https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css',
     'https://unpkg.com/kidlat-css/css/kidlat.css',
     'https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons',
     'https://cdn.jsdelivr.net/npm/vuetify@1.x/dist/vuetify.min.css'

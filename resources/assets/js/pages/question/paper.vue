@@ -57,46 +57,87 @@
                   <v-flex offset-sm1></v-flex>
                 </v-layout>
               </v-container> -->
-              <div class="container">
-                <div class="row"  >
+              <div class="container ">
+                <div class="row font-weight-bold "  >
                     <div class=" offset-1 col-1"></div>
-                    <div class=" col-5"> </div>
-                    <div class=" offset-1 col-1">{{"Max Marks"}}</div>
-                    <div class=" col-1">{{"CO"}}</div>
+                    <div class=" col-6"> </div>
+                    <div class=" col-1">{{"Max Marks"}}</div>
+                    <div class=" col-1 align-middle">{{"CO"}}</div>
                     <div class=" col-1">{{"Difficulty Level"}}</div>
                     <div class=" offset-1 col-1"></div>
                 </div>
-                <div class="row" v-show="rq.question" v-for="(rq,index) in reflectedQuestions" :key="index" >
+                <div v-for="(section) in sectionItems" :key="section">
+                <div class="row justify-content-center">Section- {{section}}</div>
+                <div class="row my-2 align-middle" v-show="section==rq.section"  v-for="(rq,index) in reflectedQuestions" :key="index" >
                     <div class=" offset-1 col-1">Q{{index}}.</div>
-                    <div class=" col-5" v-html='rq.question'> {{  }} </div>
-                    <div class=" offset-1 col-1" v-html='rq.maxMarks'>{{}}</div>
+                    <div class=" col-6" v-html='rq.question'> {{  }} </div>
+                    <div class="  col-1" v-html='rq.maxMarks'>{{}}</div>
                     <div class=" col-1" v-html='rq.CO'>{{}}</div>
                     <div class=" col-1" v-html='rq.difficultyLevel'>{{}}</div>
                     <div class=" offset-1 col-1"></div>
                 </div>
+                </div>
               </div>
           </v-card-text>
           <v-card-actions>
-            <div class="offset-md-10 col-md-2">
+            <div class="offset-md-8 col-md-4">
               <v-btn flat color="orange" @click="print">Print</v-btn>
-              <!-- <v-btn flat color="orange">Explore</v-btn> -->
+              <v-btn flat color="orange" @click="reflectedQuestions=[]">Reset</v-btn>
             </div>
           </v-card-actions>
         </v-card>
       </v-flex>
     </v-layout>
   </div>
-      <v-layout class="ma-3"></v-layout>
+  <v-layout class="ma-3"></v-layout>
+  <!-- <Section @setSectionItems= 'setSectionItems'></Section> -->
+    <v-layout>
+      <v-flex xs12 sm12>
+        <v-card>
+          <v-card-title>Enter Section Details</v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-layout>
+                <v-flex md3 >
+                  <v-text-field
+                  v-model="sectionData.num"
+                  label="No. of sections required"
+                  type="number"
+                  required
+                  >
+                  </v-text-field>
+                </v-flex>
+                <v-flex md3 offset-md1>
+                  <v-autocomplete
+                  v-model="sectionData.style"
+                  :items="['A','I','1']"
+                  label="Style of section order"
+                  required
+                  >
+                  </v-autocomplete>
+                </v-flex>
+                <v-flex md2 offset-md1>
+                  <v-btn
+                    @click="setSectionData"
+                    color="success"
+                  >
+                    continue
+                  </v-btn>
+                </v-flex>
+              </v-layout>
+            </v-container>
+          </v-card-text>
+        </v-card>
+      </v-flex>
+    </v-layout>
+
+  <v-layout class="ma-3"></v-layout>
   <div>
     <v-toolbar flat color="white" >
       <v-toolbar-title >Created Questions List</v-toolbar-title>
       <v-spacer></v-spacer>
-
-
-<question-dialog @addQuestion="addQuestion"></question-dialog>
-<!-- <question-dialog :disableDialog="disableDialogButton"></question-dialog> -->
-
-
+      <question-dialog @addQuestion="addQuestion" :sectionItems="sectionItems"></question-dialog>
+      <!-- <question-dialog @addQuestion="addQuestion" :disableDialog="selected.length==0"></question-dialog> -->
     </v-toolbar>
     <v-data-table
       v-model="selected"
@@ -105,7 +146,7 @@
       :pagination.sync="pagination"
       item-key="id"
       class="elevation-1"
-    >
+     >
       <template v-slot:headers="props">
         <tr>
           <th>
@@ -149,9 +190,11 @@
 import axios from 'axios'
 import VueHtmlToPaper from 'vue-html-to-paper';
 import QuestionDialog from "../../components/QuestionDialog.vue";
+import Section from "../../components/Section.vue";
   export default {
     components: {
-      QuestionDialog
+      QuestionDialog,
+      Section
     },
     data: () => ({
       dialog: false,
@@ -181,6 +224,16 @@ import QuestionDialog from "../../components/QuestionDialog.vue";
           CO:'',
         },
       ],
+      rq:[[]],
+      sectionItems: ["A"],
+      alphabeticSectionItems: ["A","B","C","D","E","","F","G","H","I","J"],
+      romanSectionItems: ["I","II","III" ,"IV","V","VI","VII","VIII","IX","X"],
+      numericSectionItems: ["1","2","3","4","5","6","7","8","9","10"],
+      sectionData:
+        {
+          num: 1,
+          style: 'A'
+        }
     }),
 
     methods: {
@@ -213,21 +266,58 @@ import QuestionDialog from "../../components/QuestionDialog.vue";
           if (value.choice=='Mandatory' ) {
 
             for (let index = 0; index < this.selected.length; index++) {
-            var arr = [{'question':''},{'choice':''},{'difficultyLevel':''},{'section':''},{'maxMarks':''},{'CO':''}];
+            var arr = [{'question':''},{'choice':''},{'difficultyLevel':''},{'maxMarks':''},{'section':''},{'CO':''}];
               arr.question = this.selected[index].question;
               arr.choice = value.choice;
               arr.difficultyLevel = value.difficultyLevel;
-              arr.section = value.section;
               arr.maxMarks = value.maxMarks;
+              arr.section = value.section;
               arr.CO = value.CO;
               this.reflectedQuestions.push(arr);
             }
+
+          this.selected=[]
           }
-          this.selected.length = 0;
-        }
+        },
+    setSectionData () {
+      this.reflectedQuestions=[]
+      if(this.sectionData.style=='A'){
+        this.alphabeticSectionItems.length = this.sectionData.num
+        this.sectionItems = this.alphabeticSectionItems
+      }
+      else if(this.sectionData.style=="1"){
+        this.numericSectionItems.length = this.sectionData.num
+        this.sectionItems = this.numericSectionItems
+      }
+      else{
+        this.romanSectionItems.length = this.sectionData.num
+        this.sectionItems = this.romanSectionItems
+      }
+
+// this.$emit('setSectionItems',this.sectionItems)
+    },
+
+        // setSectionItems: function (value) {
+        //   this.sectionItems = value
+        //   console.log(this.sectionItems)
+        // }
     },
     mounted() {
       this.getQuestions();
+      this.rq[0].push({
+        question:'0',
+        choice:'0',
+        difficultyLevel:'0',
+        section:'0',
+        maxMarks:'0',
+        CO:'0',
+      })
+      // console.log(this.rq)
+    },
+    watch: {
+      // sectionData (newValue, oldValue) {
+
+      // }
     },
   }
 </script>
