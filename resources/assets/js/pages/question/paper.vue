@@ -30,28 +30,6 @@
                 </div>
               </div>
               <hr>
-              <!-- <v-container class="">
-                <v-layout >
-                  <v-flex offset-sm1></v-flex>
-                  <v-flex sm1></v-flex>
-                  <v-flex sm5>  </v-flex>
-                  <v-flex offset-sm1></v-flex>
-                  <v-flex sm1>Max Marks</v-flex>
-                  <v-flex sm1>CO </v-flex>
-                  <v-flex sm1>Diffifulty Level</v-flex>
-                  <v-flex offset-sm1></v-flex>
-                </v-layout>
-                <v-layout v-show="rq.question" v-for="(rq,index) in reflectedQuestions" :key="index">
-                  <v-flex offset-sm1></v-flex>
-                  <v-flex sm1>Q{{index}}.</v-flex>
-                  <v-flex sm5 class="" v-html='rq.question'> </v-flex>
-                  <v-flex offset-sm1></v-flex>
-                  <v-flex sm1>{{rq.maxMarks}}</v-flex>
-                  <v-flex sm1>{{rq.CO}}</v-flex>
-                  <v-flex sm1>{{rq.difficultyLevel}}</v-flex>
-                  <v-flex offset-sm1></v-flex>
-                </v-layout>
-              </v-container> -->
               <div class="container ">
                 <div class="row font-weight-bold "  >
                     <div class=" offset-1 col-1"></div>
@@ -64,13 +42,16 @@
                 <div v-for="(section) in sectionItems" :key="section">
                 <div class="row justify-content-center font-weight-bold">Section- {{section}}</div>
                 <div class="row my-2 align-middle" v-show="section==rq.section"  v-for="(rq,index) in reflectedQuestions" :key="index" >
-                <div class="col-12 d-flex justify-content-center font-weight-bold" v-if="rq.choice=='OR'">{{rq.choice}}</div>
-                    <div class=" offset-1 col-1">Q{{rq.qno}}.</div>                    <div class=" col-6" v-html='rq.question'> {{  }} </div>
+                    <div class="col-12 d-flex justify-content-center font-weight-bold" v-if="rq.choice=='OR'">{{rq.choice}}</div>
+                    <div class="col-12 d-flex justify-content-center font-weight-bold" v-else-if="rq.choice!='Mandatory'">{{rq.choice}}</div>
+                    <div class=" offset-1 col-1">Q{{rq.qno}}.</div>                    
+                    <div class=" col-6" v-html='rq.question'> {{  }} </div>
                     <div class="  col-1" v-html='rq.maxMarks'>{{}}</div>
                     <div class=" col-1" v-html='rq.CO'>{{}}</div>
                     <div class=" col-1" v-html='rq.difficultyLevel'>{{}}</div>
                     <div class=" offset-1 col-1"></div>
                 </div>
+                <div class="row"></div>
                 </div>
               </div>
           </v-card-text>
@@ -93,32 +74,43 @@
           <v-card-text>
             <v-container>
               <v-layout>
-                <v-flex md3 >
-                  <v-text-field
-                  v-model="sectionData.num"
-                  label="No. of sections required"
-                  type="number"
-                  required
-                  >
-                  </v-text-field>
-                </v-flex>
-                <v-flex md3 offset-md1>
-                  <v-autocomplete
-                  v-model="sectionData.style"
-                  :items="['A','I','1']"
-                  label="Style of section order"
-                  required
-                  >
-                  </v-autocomplete>
-                </v-flex>
-                <v-flex md2 offset-md1>
-                  <v-btn
-                    @click="setSectionData"
-                    color="success"
-                  >
-                    continue
-                  </v-btn>
-                </v-flex>
+                <!-- <v-form> -->
+
+                      <v-flex offset-1 md3 >
+                        <v-text-field
+                        v-model="sectionData.num"
+                        label="No. of sections required"
+                        type="number"
+                        v-validate="'required|max:1'"
+        :counter="1"
+        :error-messages="errors.collect('sections')"
+        data-vv-name="sections"
+        required
+                        >
+                        </v-text-field>
+                      </v-flex>
+                      <v-flex md3 offset-md1>
+                        <v-autocomplete
+                        v-model="sectionData.style"
+                        :items="['A','I','1']"
+                        label="Style of section order"
+        v-validate="'required'"
+        :error-messages="errors.collect('sectionStyle')"
+        data-vv-name="sectionStyle"
+        required
+                        >
+                        </v-autocomplete>
+                      </v-flex>
+                      <v-flex md2 offset-md1>
+                        <v-btn
+                          @click="setSectionData"
+                          color="success"
+                          :disabled="!(sectionData.num && sectionData.style)"
+                        >
+                          continue
+                        </v-btn>
+                      </v-flex>
+                <!-- </v-form> -->
               </v-layout>
             </v-container>
           </v-card-text>
@@ -131,7 +123,7 @@
     <v-toolbar flat color="white" >
       <v-toolbar-title >Created Questions List</v-toolbar-title>
       <v-spacer></v-spacer>
-      <question-dialog @addQuestion="addQuestion" :sectionItems="sectionItems"></question-dialog>
+      <question-dialog @addQuestion="addQuestion" @closeDialog="closeDialog" :sectionItems="sectionItems" :noOfQuestions="selected.length"></question-dialog>
       <!-- <question-dialog @addQuestion="addQuestion" :disableDialog="selected.length==0"></question-dialog> -->
     </v-toolbar>
     <v-data-table
@@ -200,7 +192,7 @@
       </template>
     </v-data-table>
 <!-- snackbar -->
-      <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+      <v-snackbar v-model="snack" :timeout="snackTimeout" :color="snackColor">
         {{ snackText }}
         <v-btn flat @click="snack = false">Close</v-btn>
       </v-snackbar>
@@ -214,16 +206,29 @@ import axios from 'axios'
 import VueHtmlToPaper from 'vue-html-to-paper';
 import QuestionDialog from "../../components/QuestionDialog.vue";
 import Section from "../../components/Section.vue";
+
   export default {
+    $_veeValidate: {
+      validator: 'new'
+    },
     components: {
       QuestionDialog,
       Section
     },
     data: () => ({
+      snackTimeout: 3000,
+      custom:{
+        sections:{
+          required: () => 'No. of section can\'t be null'
+        },
+        sectionStyle:{
+          required: () => 'Section style can\'t be null'
+        },
+      },
       snack: false,
       snackColor: '',
       snackText: '',
-      max25chars: v => v.length <= 5 || 'Input too long!',
+      max25chars: v => v.length <= 2 || 'Input too long!',
       dialog: false,
       disableDialogButton: true,
       pagination: {
@@ -268,7 +273,7 @@ import Section from "../../components/Section.vue";
     save () {
       this.snack = true
       this.snackColor = 'success'
-      this.snackText = 'Data saved'
+      this.snackText = 'Question no. edited successfully!'
     },
     cancel () {
       this.snack = true
@@ -278,7 +283,7 @@ import Section from "../../components/Section.vue";
     open () {
       this.snack = true
       this.snackColor = 'info'
-      this.snackText = 'Dialog opened'
+      this.snackText = 'Edit Question no like: 1, 1(a)'
     },
     close () {
       // console.log('Dialog closed')
@@ -298,6 +303,10 @@ import Section from "../../components/Section.vue";
         getQuestions: function(){
           axios.get('/api/getQuestions')
           .then(res => {
+            for (let index = 0; index < res.data.length; index++) {
+              const element = res.data[index];
+              
+            }
             this.questionData = res.data
           })
           .catch(err => {
@@ -315,7 +324,13 @@ import Section from "../../components/Section.vue";
             var arr = [{'qno':''},{'question':''},{'choice':''},{'difficultyLevel':''},{'maxMarks':''},{'section':''},{'CO':''}];
               arr.qno = this.selected[index].qno;
               arr.question = this.selected[index].question;
-              arr.choice = value.choice;
+              if (index!==0) {
+                if (value.choice=='OR') {
+                  arr.choice = value.choice
+              }
+              } else if (value.choice=='Optional') {
+                arr.choice = 'Solve any '+value.necessaryOption+' of '+ this.selected.length
+              } 
               arr.difficultyLevel = value.difficultyLevel;
               arr.maxMarks = value.maxMarks;
               arr.section = value.section;
@@ -327,7 +342,13 @@ import Section from "../../components/Section.vue";
           this.selected=[]
           // }
         },
+    closeDialog (value) {
+      this.snack=value.snack
+      this.snackText=value.snackText
+      this.snackColor=value.snackColor
+      },
     setSectionData () {
+      this.$validator.validateAll()
       this.reflectedQuestions=[]
       if(this.sectionData.style=='A'){
         this.alphabeticSectionItems.length = this.sectionData.num
@@ -355,6 +376,18 @@ import Section from "../../components/Section.vue";
         CO:'0',
       })
       // console.log(this.rq)
+    },
+    created () {
+      setTimeout(() => {
+        
+        this.snack= true
+        this.snackColor=  'info'
+        this.snackTimeout= 5000
+        this.snackText= 'Q. no column is editable in table, just click there!'
+      }, 3000);
+    },
+    watch: {
+
     },
 
   }

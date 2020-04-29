@@ -8,6 +8,9 @@ import '~/components'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import VueHtmlToPaper from 'vue-html-to-paper'
+import VeeValidate from 'vee-validate'
+
+Vue.use(VeeValidate)
 
 const options = {
   name: '_blank',
