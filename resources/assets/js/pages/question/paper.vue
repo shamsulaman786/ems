@@ -5,11 +5,6 @@
     <v-layout>
       <v-flex xs12 sm12 >
         <v-card>
-          <!-- <v-card-title primary-title>
-            <div class=" mx-auto">
-              <h3 class="headline mb-0" style="color:primary">Your Current Question Paper</h3>
-            </div>
-          </v-card-title> -->
           <v-card-text id="questionPaper">
               <div class="row">
                 <div class="offset-3 "></div>
@@ -62,14 +57,15 @@
                     <div class=" offset-1 col-1"></div>
                     <div class=" col-6"> </div>
                     <div class=" col-1">{{"Max Marks"}}</div>
-                    <div class=" col-1 align-middle">{{"CO"}}</div>
+                    <div class=" col-1 ">{{"CO"}}</div>
                     <div class=" col-1">{{"Difficulty Level"}}</div>
                     <div class=" offset-1 col-1"></div>
                 </div>
                 <div v-for="(section) in sectionItems" :key="section">
-                <div class="row justify-content-center">Section- {{section}}</div>
+                <div class="row justify-content-center font-weight-bold">Section- {{section}}</div>
                 <div class="row my-2 align-middle" v-show="section==rq.section"  v-for="(rq,index) in reflectedQuestions" :key="index" >
-                    <div class=" offset-1 col-1">Q{{index}}.</div>
+                <div class="col-12 d-flex justify-content-center font-weight-bold" v-if="rq.choice=='OR'">{{rq.choice}}</div>
+                    <div class=" offset-1 col-1">Q{{rq.qno}}.</div>                    
                     <div class=" col-6" v-html='rq.question'> {{  }} </div>
                     <div class="  col-1" v-html='rq.maxMarks'>{{}}</div>
                     <div class=" col-1" v-html='rq.CO'>{{}}</div>
@@ -179,10 +175,38 @@
             ></v-checkbox>
           </td>
           <td class="text-xs-center">{{ props.item.id }}</td>
+<!-- qno -->
+          <td class="text-xs-center"> 
+            <v-edit-dialog
+              :return-value.sync="props.item.qno"
+              lazy
+              @save="save"
+              @cancel="cancel"
+              @open="open"
+              @close="close"
+            > {{ props.item.qno }}
+              <template v-slot:input>
+                <v-text-field
+                  v-model="props.item.qno"
+                  label="Edit"
+                  single-line
+                  counter
+                ></v-text-field>
+              </template>
+            </v-edit-dialog>
+          </td>
+<!-- qno -->
           <td class="text-xs-left" v-html="props.item.question"></td>
         </tr>
       </template>
     </v-data-table>
+<!-- snackbar -->
+      <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+        {{ snackText }}
+        <v-btn flat @click="snack = false">Close</v-btn>
+      </v-snackbar>
+<!-- snackbar -->
+
   </div>
 </div>
 </template>
@@ -197,6 +221,10 @@ import Section from "../../components/Section.vue";
       Section
     },
     data: () => ({
+      snack: false,
+      snackColor: '',
+      snackText: '',
+      max25chars: v => v.length <= 5 || 'Input too long!',
       dialog: false,
       disableDialogButton: true,
       pagination: {
@@ -205,12 +233,13 @@ import Section from "../../components/Section.vue";
       selected: [],
       headers: [
         { text: 'Id', value: 'id',  },
+        { text: 'Q. no', value: 'qno',  },
         { text: 'Question', value: 'question', align: 'center'  }
       ],
       questionData: [
         {
-          name: 'Question Data',
           id: 159,
+          qno: null,
           question: 6.0
         }
       ],
@@ -237,6 +266,24 @@ import Section from "../../components/Section.vue";
     }),
 
     methods: {
+    save () {
+      this.snack = true
+      this.snackColor = 'success'
+      this.snackText = 'Data saved'
+    },
+    cancel () {
+      this.snack = true
+      this.snackColor = 'error'
+      this.snackText = 'Canceled'
+    },
+    open () {
+      this.snack = true
+      this.snackColor = 'info'
+      this.snackText = 'Dialog opened'
+    },
+    close () {
+      // console.log('Dialog closed')
+    },
       toggleAll () {
         if (this.selected.length) this.selected = []
         else this.selected = this.questionData.slice()
@@ -263,10 +310,12 @@ import Section from "../../components/Section.vue";
         },
 
         addQuestion: function (value) {
-          if (value.choice=='Mandatory' ) {
+          // if (value.choice=='Mandatory' ) {
 
             for (let index = 0; index < this.selected.length; index++) {
             var arr = [{'question':''},{'choice':''},{'difficultyLevel':''},{'maxMarks':''},{'section':''},{'CO':''}];
+            var arr = [{'qno':''},{'question':''},{'choice':''},{'difficultyLevel':''},{'maxMarks':''},{'section':''},{'CO':''}];
+              arr.qno = this.selected[index].qno;
               arr.question = this.selected[index].question;
               arr.choice = value.choice;
               arr.difficultyLevel = value.difficultyLevel;
@@ -274,10 +323,11 @@ import Section from "../../components/Section.vue";
               arr.section = value.section;
               arr.CO = value.CO;
               this.reflectedQuestions.push(arr);
+              // console.log(this.reflectedQuestions[1].question)
             }
 
           this.selected=[]
-          }
+          // }
         },
     setSectionData () {
       this.reflectedQuestions=[]
@@ -293,14 +343,8 @@ import Section from "../../components/Section.vue";
         this.romanSectionItems.length = this.sectionData.num
         this.sectionItems = this.romanSectionItems
       }
-
-// this.$emit('setSectionItems',this.sectionItems)
     },
 
-        // setSectionItems: function (value) {
-        //   this.sectionItems = value
-        //   console.log(this.sectionItems)
-        // }
     },
     mounted() {
       this.getQuestions();
@@ -314,10 +358,6 @@ import Section from "../../components/Section.vue";
       })
       // console.log(this.rq)
     },
-    watch: {
-      // sectionData (newValue, oldValue) {
 
-      // }
-    },
   }
 </script>
