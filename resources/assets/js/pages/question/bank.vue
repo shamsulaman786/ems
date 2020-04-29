@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <v-card>
+    <v-card dark>
       <v-card-title>
         Current Question
       </v-card-title>

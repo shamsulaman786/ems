@@ -16,23 +16,6 @@
             <v-container grid-list-md>
               <v-layout wrap>
 
-                <!-- <v-flex xs12 sm6 md4>
-                  <v-text-field label="Legal middle name" hint="example of helper text only on focus"></v-text-field>
-                </v-flex>
-                <v-flex xs12 sm6 md4>
-                  <v-text-field
-                    label="Legal last name*"
-                    hint="example of persistent helper text"
-                    persistent-hint
-                    required
-                  ></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-text-field label="Email*" required></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-text-field label="Password*" type="password" required></v-text-field>
-                </v-flex> -->
                 <v-flex xs12 sm6>
                   <v-select
                     :items="['Mandatory', 'OR', 'Optional']"
@@ -110,8 +93,7 @@ export default {
         {'difficultyLevel':''},
         {'section':''},
         {'maxMarks':''},
-        {'CO':''},
-        {'question':''}
+        {'CO':''}
       ]
     }
   },
@@ -134,7 +116,6 @@ methods: {
 
 watch: {
   dialog (newValue, oldValue) {
-
   }
 },
 }
