@@ -15,11 +15,13 @@ Forked from https://github.com/shamsulaman786/ems
 - Integration with [vform](https://github.com/cretueusebiu/vform)
 - Authentication with [JWT](https://github.com/tymondesigns/jwt-auth)
 - Webpack with [laravel-mix](https://github.com/JeffreyWay/laravel-mix)
+- etc..!
 
 ## Installation
 
 - `git clone https://github.com/shamsulaman786/ems.git`
-- `cd laravel-vue-spa`
+- `cd ems`
+- `git checkout master_alias`
 - `cp .env.example .env`
 - `composer install`
 - `php artisan key:generate`
@@ -36,8 +38,8 @@ Forked from https://github.com/shamsulaman786/ems
 # build and watch
 npm run watch
 
-# serve with hot reloading
-npm run hot
+# serve for development
+npm run dev
 ```
 
 #### Production
