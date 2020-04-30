@@ -9,21 +9,21 @@
               <div class="row">
                 <div class="offset-3 "></div>
                 <div class="col-sm-6 text-center">
-                  <b>TEST LINKASHOKA INSTITUTE OF ENGINEERING AND TECHNOLOGY</b><br>
-                  <b>EEE B.Tech Test1 Internal Examination</b>
+                  <h3>SHAHEED BHAGAT SINGH STATE TECHNICAL CAMPUS</h3><br>
+                  <b>CSE B.Tech Test1 Internal Examination</b>
                 </div>
               </div>
               <div class="row">
                 <div class="offset-sm-1 col-sm-4 ">
                     <span>
-                    <b>Course:</b> Electromagnetic Fields
+                    <b>Course:</b> Computer Programming
                     </span><br>
-                    <span><b>Branch:</b> EEE B.Tech II-I(none)</span><br>
-                    <span><b>Date:</b> 26-Nov-2019</span>
+                    <span><b>Branch:</b> CSE B.Tech II-I(none)</span><br>
+                    <span><b>Date:</b> 30-Apr-2020</span>
                 </div>
-                <div class="offset-sm-1 col-sm-2 ">
-                    <span><b>Course Code:</b> EE305PC</span><br>
-                    <span><b>Max. Marks: </b>62</span>
+                <div class=" col-sm-2 ">
+                    <span><b>Course Code:</b> CSE305PC</span><br>
+                    <span><b>Max. Marks: </b>100</span>
                 </div>
                 <div class="offset-sm-2 col-sm-1 ">
                     <b>Time:</b> 3Hrs
@@ -32,9 +32,9 @@
               <hr>
               <div class="container ">
                 <div class="row font-weight-bold "  >
-                    <div class=" offset-1 col-1"></div>
+                    <div class="  col-1"></div>
                     <div class=" col-6"> </div>
-                    <div class=" col-1">{{"Max Marks"}}</div>
+                    <div class="text-sm-center col-1">{{"Max Marks"}}</div>
                     <div class=" col-1 ">{{"CO"}}</div>
                     <div class=" col-1">{{"Difficulty Level"}}</div>
                     <div class=" offset-1 col-1"></div>
@@ -43,10 +43,11 @@
                 <div class="row justify-content-center font-weight-bold">Section- {{section}}</div>
                 <div class="row my-2 align-middle" v-show="section==rq.section"  v-for="(rq,index) in reflectedQuestions" :key="index" >
                     <div class="col-12 d-flex justify-content-center font-weight-bold" v-if="rq.choice=='OR'">{{rq.choice}}</div>
-                    <div class="col-12 d-flex justify-content-center font-weight-bold" v-else-if="rq.choice!='Mandatory'">{{rq.choice}}</div>
-                    <div class=" offset-1 col-1">Q{{rq.qno}}.</div>                    
-                    <div class=" col-6" v-html='rq.question'> {{  }} </div>
-                    <div class="  col-1" v-html='rq.maxMarks'>{{}}</div>
+                    <div class="col-12 d-flex justify-content-center font-weight-bold py-3" v-if="rq.choice!==('OR'||'Mandatory') ">{{rq.choice}}</div>
+                    <div class=" col-1 text-sm-right" >{{rq.qno}}</div>
+                    <div class=" col-1" >{{rq.sqno}}</div>                    
+                    <div class=" col-5" v-html='rq.question'> </div>
+                    <div class="text-sm-center  col-1" v-html='rq.maxMarks'>{{}}</div>
                     <div class=" col-1" v-html='rq.CO'>{{}}</div>
                     <div class=" col-1" v-html='rq.difficultyLevel'>{{}}</div>
                     <div class=" offset-1 col-1"></div>
@@ -58,7 +59,7 @@
           <v-card-actions>
             <div class="offset-md-8 col-md-4">
               <v-btn flat color="orange" @click="print">Print</v-btn>
-              <v-btn flat color="orange" @click="reflectedQuestions=[]">Reset</v-btn>
+              <v-btn flat color="orange" @click="reflectedQuestions=[]; qno=1">Reset</v-btn>
             </div>
           </v-card-actions>
         </v-card>
@@ -66,7 +67,6 @@
     </v-layout>
   </div>
   <v-layout class="ma-3"></v-layout>
-  <!-- <Section @setSectionItems= 'setSectionItems'></Section> -->
     <v-layout>
       <v-flex xs12 sm12>
         <v-card>
@@ -74,15 +74,13 @@
           <v-card-text>
             <v-container>
               <v-layout>
-                <!-- <v-form> -->
 
                       <v-flex offset-1 md3 >
                         <v-text-field
                         v-model="sectionData.num"
-                        label="No. of sections required"
+                        label="No. of required sections"
                         type="number"
-                        v-validate="'required|max:1'"
-        :counter="1"
+                        :rules="secCountRules"
         :error-messages="errors.collect('sections')"
         data-vv-name="sections"
         required
@@ -110,7 +108,6 @@
                           continue
                         </v-btn>
                       </v-flex>
-                <!-- </v-form> -->
               </v-layout>
             </v-container>
           </v-card-text>
@@ -123,8 +120,7 @@
     <v-toolbar flat color="white" >
       <v-toolbar-title >Created Questions List</v-toolbar-title>
       <v-spacer></v-spacer>
-      <question-dialog @addQuestion="addQuestion" @closeDialog="closeDialog" :sectionItems="sectionItems" :noOfQuestions="selected.length"></question-dialog>
-      <!-- <question-dialog @addQuestion="addQuestion" :disableDialog="selected.length==0"></question-dialog> -->
+      <question-dialog @addQuestion="addQuestion" @closeDialog="closeDialog" :questionNo="qno" :sectionItems="sectionItems" :noOfQuestions="selected.length"></question-dialog>
     </v-toolbar>
     <v-data-table
       v-model="selected"
@@ -165,38 +161,14 @@
               hide-details
             ></v-checkbox>
           </td>
-          <td class="text-xs-center">{{ props.item.id }}</td>
-<!-- qno -->
-          <td class="text-xs-center"> 
-            <v-edit-dialog
-              :return-value.sync="props.item.qno"
-              lazy
-              @save="save"
-              @cancel="cancel"
-              @open="open"
-              @close="close"
-            > {{ props.item.qno }}
-              <template v-slot:input>
-                <v-text-field
-                  v-model="props.item.qno"
-                  label="Edit"
-                  single-line
-                  counter
-                ></v-text-field>
-              </template>
-            </v-edit-dialog>
-          </td>
-<!-- qno -->
+          <td class="text-xs-left">{{ props.item.id }}</td>
           <td class="text-xs-left" v-html="props.item.question"></td>
         </tr>
       </template>
     </v-data-table>
-<!-- snackbar -->
-      <v-snackbar v-model="snack" :timeout="snackTimeout" :color="snackColor">
+      <v-snackbar v-model="snack" :timeout="snackTimeout" :color="snackColor" :top='topRightSnackbar' :right='topRightSnackbar'>
         {{ snackText }}
-        <v-btn flat @click="snack = false">Close</v-btn>
       </v-snackbar>
-<!-- snackbar -->
 
   </div>
 </div>
@@ -216,6 +188,15 @@ import Section from "../../components/Section.vue";
       Section
     },
     data: () => ({
+      secCountRules: [
+        v => !!v || 'No of section is required',
+        v => (v && v <= 10) || 'No of section must be less than 10',
+        v => (v && v >= 1) || 'No of section must be greater equal 1',
+      ],
+      topRightSnackbar:false,
+      necessaryOptionMaxMarks:'',
+      qno:0,
+      sqno:97,
       snackTimeout: 3000,
       custom:{
         sections:{
@@ -228,7 +209,7 @@ import Section from "../../components/Section.vue";
       snack: false,
       snackColor: '',
       snackText: '',
-      max25chars: v => v.length <= 2 || 'Input too long!',
+      max25chars: v => v <= 9 || 'Input too long!',
       dialog: false,
       disableDialogButton: true,
       pagination: {
@@ -236,8 +217,7 @@ import Section from "../../components/Section.vue";
       },
       selected: [],
       headers: [
-        { text: 'Id', value: 'id',  },
-        { text: 'Q. no', value: 'qno',  },
+        { text: 'Sr no.', value: 'id', align: 'center' },
         { text: 'Question', value: 'question', align: 'center'  }
       ],
       questionData: [
@@ -270,24 +250,6 @@ import Section from "../../components/Section.vue";
     }),
 
     methods: {
-    save () {
-      this.snack = true
-      this.snackColor = 'success'
-      this.snackText = 'Question no. edited successfully!'
-    },
-    cancel () {
-      this.snack = true
-      this.snackColor = 'error'
-      this.snackText = 'Canceled'
-    },
-    open () {
-      this.snack = true
-      this.snackColor = 'info'
-      this.snackText = 'Edit Question no like: 1, 1(a)'
-    },
-    close () {
-      // console.log('Dialog closed')
-    },
       toggleAll () {
         if (this.selected.length) this.selected = []
         else this.selected = this.questionData.slice()
@@ -303,9 +265,10 @@ import Section from "../../components/Section.vue";
         getQuestions: function(){
           axios.get('/api/getQuestions')
           .then(res => {
-            for (let index = 0; index < res.data.length; index++) {
-              const element = res.data[index];
-              
+            var count =1
+            for (const iterator of res.data) {
+              iterator.id=count
+              count++
             }
             this.questionData = res.data
           })
@@ -318,30 +281,61 @@ import Section from "../../components/Section.vue";
         },
 
         addQuestion: function (value) {
-          // if (value.choice=='Mandatory' ) {
+          value.choice !='OR' ? this.qno++ : '';
 
-            for (let index = 0; index < this.selected.length; index++) {
-            var arr = [{'qno':''},{'question':''},{'choice':''},{'difficultyLevel':''},{'maxMarks':''},{'section':''},{'CO':''}];
-              arr.qno = this.selected[index].qno;
+            var len= this.selected.length;
+            for (let index = 0; index < len; index++) {
+            var arr = [{'qno':''},{'sqno':''},{'question':''},{'choice':''},{'difficultyLevel':''},{'maxMarks':''},{'section':''},{'CO':''}];
+              if (index==0) {
+                arr.qno = 'Q'+this.qno+'.';
+              }
+              if (len>1) {
+                if (value.subQnStyle=='a') {
+                  arr.sqno= String.fromCharCode(this.sqno) 
+                } else {
+                  arr.sqno = this.romanize(this.sqno-96).toLocaleLowerCase()
+                }
+                this.sqno++
+                arr.sqno += ').'
+              }
+              if (index==len-1) {
+                this.sqno=97
+              }
               arr.question = this.selected[index].question;
-              if (index!==0) {
+              if (index==0) {
                 if (value.choice=='OR') {
                   arr.choice = value.choice
+                } else if (value.choice=='Optional') {
+                  this.necessaryOptionMaxMarks=(value.necessaryOption*value.maxMarks)
+                  arr.choice = 'Solve any '+value.necessaryOption+' of '+ this.selected.length + ' for Max Marks : [' +this.necessaryOptionMaxMarks+']';
+                }
               }
-              } else if (value.choice=='Optional') {
-                arr.choice = 'Solve any '+value.necessaryOption+' of '+ this.selected.length
+              else
+              {
+                this.necessaryOptionMaxMarks=''
               } 
-              arr.difficultyLevel = value.difficultyLevel;
-              arr.maxMarks = value.maxMarks;
+              arr.difficultyLevel = '['+value.difficultyLevel+']';
+              arr.maxMarks = '['+value.maxMarks+']';
               arr.section = value.section;
               arr.CO = value.CO;
               this.reflectedQuestions.push(arr);
-              // console.log(this.reflectedQuestions[1].question)
             }
-
           this.selected=[]
-          // }
+          this.topRightSnackbar=true,
+          this.snackColor='success',
+          this.snackText='Question added successfully!',
+          this.snack=true
         },
+    romanize(num) {
+        var lookup = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1},roman = '',i;
+        for ( i in lookup ) {
+          while ( num >= lookup[i] ) {
+            roman += i;
+            num -= lookup[i];
+          }
+        }
+        return roman;
+      },
     closeDialog (value) {
       this.snack=value.snack
       this.snackText=value.snackText
@@ -375,16 +369,6 @@ import Section from "../../components/Section.vue";
         maxMarks:'0',
         CO:'0',
       })
-      // console.log(this.rq)
-    },
-    created () {
-      setTimeout(() => {
-        
-        this.snack= true
-        this.snackColor=  'info'
-        this.snackTimeout= 5000
-        this.snackText= 'Q. no column is editable in table, just click there!'
-      }, 3000);
     },
     watch: {
 
